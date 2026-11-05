@@ -94,7 +94,7 @@ All playing comes in over MIDI IN, from any pad controller (MPD, MPK, an MPC use
 
 | Feature | How it works |
 |---|---|
-| **Pad notes** | Default 16 pads = notes 36–51 (Akai MPD/MPK bank A), 4 banks = 64 pads. **LEARN**: in SETUP press LEARN, then hit your pads 1–16 in order. Saved with the setup. |
+| **Pad notes** | Presets: **MPC CLASSIC** (default, for the MPC Key 37) and **CHROMATIC** 36–51 (MPD/MPK). 4 banks = 64 pads. **LEARN**: in SETUP press LEARN, then hit your pads 1–16 in order. Saved with the setup. |
 | **Banks** | Either the controller's own bank buttons (other notes → pads 17–64), or a **BANK** soft key / footswitch that shifts the same 16 notes to bank A/B/C/D. |
 | **Velocity** | Per controller: curve soft / linear / hard, or **FULL LEVEL** (always 127, the MPC button). Per pad: velocity → level and velocity → filter amounts. |
 | **Pad follow** | The last pad you hit becomes the selected pad on PADS, CHOP and STEP. Hit a pad, then edit it. |
@@ -105,6 +105,26 @@ All playing comes in over MIDI IN, from any pad controller (MPD, MPK, an MPC use
 
 The S1100 has **one MIDI IN**. To use a controller and an external clock (DAW, drum machine)
 at the same time, use a MIDI merge box, or let the S1100 be the clock master (MIDI clock OUT).
+
+### Controller profile: Akai MPC Key 37 (default)
+
+Connection: **MPC Key 37 MIDI OUT (DIN) → S1100 MIDI IN**. Optional: S1100 MIDI OUT → MPC Key MIDI IN
+(for MIDI tracks played on the MPC's synths, or S1100 as clock master).
+
+| MPC Key 37 | Channel (default) | What it does on the S1100 |
+|---|---|---|
+| **16 pads** | 10 | Play the current kit. Pad notes from the **MPC CLASSIC** preset (A01–A16 = 37 36 42 82 40 38 46 44 48 47 45 43 49 55 51 53), or LEARN. MPC pad banks A–D → S1100 banks A–D. |
+| **37 keys** | 1 | **KEYS mode**: play the last hit pad *chromatically*, middle C = the sample's original pitch. For melodic chops, stabs, bass from a chopped note. |
+| **Q-Link knobs** | 10 | CC LEARN to pad tune / filter / decay / level, swing, tempo. |
+| **Pitch bend / mod** | 1 | Pitch bend and filter on KEYS mode notes. |
+| **Play / Stop** | — | The MPC's transport sends **MIDI Start/Stop + clock**. With SYNC = MIDI, the S1100 sequencer follows the MPC's play/stop and tempo. Everything comes down one cable, so no merge box is needed. With SYNC = internal, the S1100 is the master and the MPC's play buttons are ignored. |
+
+Set up on the MPC: a MIDI track (or two: pads and keys) with output **MIDI Out (DIN)** on the
+channels above, and MIDI clock / transport sending switched on in the MPC's sync preferences.
+(The exact menu names differ between MPC OS versions; check once it's set up. Akai notes that in
+USB controller mode the transport buttons don't send MIDI, so use the MPC's MIDI clock/sync output for transport.)
+
+The pad-note preset and channels are assumptions until tested with your unit; LEARN covers any difference.
 
 ---
 
