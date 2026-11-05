@@ -1,5 +1,8 @@
 # Roadmap
 
+Personal build for one machine. No distribution, so we can freely reuse and
+study Akai code (S1100 OS, and MPC3000/S3000 OS as a reference).
+
 ## Approach
 Patch Akai's OS rather than rewrite it. The voice chips are undocumented, so
 we reuse Akai's own routines for triggering voices, reading the disk and
@@ -39,7 +42,8 @@ Depends on the LCD (40×8 text-only, or a graphic screen?).
 - [ ] MIDI CC → filter, pitch, loop points and other parameters, changed live; extra LFOs
 
 ## Phase 4 – Sequencer (MPC3000-style)
-Our own code, modelled on how the MPC3000 works (it shares an engine with the S3000).
+Our own sequencer engine, made to behave like the MPC3000. If we can get an MPC3000 ROM dump,
+we disassemble its timing, swing and note-repeat code and copy that behaviour exactly.
 - [ ] 96 PPQN timing, 99 sequences × 32 tracks (or as many as memory allows), songs from chained sequences
 - [ ] MPC-style swing (50–75%), timing correct, note repeat
 - [ ] Real-time (loop) recording with overdub, step edit, erase while playing
@@ -71,6 +75,5 @@ Three levels, from safest to most hardware-dependent:
       the OS loads. If so, write new ones: reverb, crusher, ring mod, filter, tape wobble.
       If its programs are fixed in a ROM, we can only change their parameters.
 
-## Phase 7 – Distribution
-- [ ] Patch set that applies to a user's own dump (we don't share Akai's code)
-- [ ] Burning guide
+## Phase 7 – Burn & install
+- [ ] Final images on EPROMs (sockets on the board), originals kept safe as a backup
