@@ -57,22 +57,18 @@ behind one key combination (CLASSIC mode, see below).
 
    CURSOR knob   DATA knob
 
-   PAD GRID (number keypad, 4×4):       PAD   =   ORIGINAL KEY
-   [13][14][15][16]                    13 14 15 16 = 7   8   9   MARK
-   [ 9][10][11][12]                     9 10 11 12 = 4   5   6   JUMP
-   [ 5][ 6][ 7][ 8]                     5  6  7  8 = 1   2   3   NAME
-   [ 1][ 2][ 3][ 4]                     1  2  3  4 = 0   +   -   ENT/PLAY
+   number keypad: numbers and naming as on the stock S1100, plus a few shortcuts
 ```
 
+- **Playing is done on a MIDI pad controller** (see *The MIDI controller* below).
+  The S1100 panel is for editing and navigation only.
 - **Main buttons** select the mode (table below). The LED of the current mode lights;
   in MAIN the PLAY/REC state blinks on the MAIN LED to the beat.
-- **Pad grid**: on most pages the keypad works as **16 pads, MPC layout** (pad 1 bottom-left).
-  It plays the current bank of the current kit. No velocity on the panel; velocity comes
-  from a MIDI pad controller (MPD, MPK, an old MPC as controller, anything).
-  On pages with number fields, **holding a main button + keypad** types numbers, or the
-  pad grid switches back to numbers while the cursor is on a numeric field (a SETUP option).
+- **Number keypad** keeps its Akai job: typing numbers and names. Shortcuts in MAIN:
+  **ENT/PLAY** = play/stop, **MARK** = record, **JUMP** = go to bar (type the bar number).
+  In CHOP, **MARK** drops a slice point while the sample plays.
 - **CURSOR / DATA knobs** stay as Akai designed them: CURSOR moves between fields, DATA changes values.
-- **Footswitches 1 and 2**: default PLAY/STOP and REC/OVERDUB (assignable: punch-in, tap tempo, next pad bank).
+- **Footswitches 1 and 2**: default PLAY/STOP and REC/OVERDUB (assignable: punch-in, tap tempo, next pad bank, note repeat).
 - **CLASSIC mode**: hold **UTILITY + DISK** for 1 second to drop into the untouched Akai
   OS pages. Same again to come back. The sound engine and memory are shared, so you
   can use deep Akai editing (loop crossfade, velocity layers) on any sample, then return.
@@ -88,7 +84,27 @@ behind one key combination (CLASSIC mode, see below).
 | DISK | **DISK** | Load/save kits, sequences, songs, whole projects. Folder-style browser. |
 | MASTER TUNE | **STEP** | Step editor / event list for the current track. |
 | DRUM | **SONG** | Chain sequences into a song. Convert a song to one long sequence. |
-| UTILITY | **SETUP** | MIDI, sync (MIDI clock / SMPTE), metronome, outputs, pad grid options, CLASSIC entry. |
+| UTILITY | **SETUP** | MIDI controller setup, sync (MIDI clock / SMPTE), metronome, outputs, CLASSIC entry. |
+
+---
+
+## The MIDI controller
+
+All playing comes in over MIDI IN, from any pad controller (MPD, MPK, an MPC used as a controller and so on).
+
+| Feature | How it works |
+|---|---|
+| **Pad notes** | Default 16 pads = notes 36–51 (Akai MPD/MPK bank A), 4 banks = 64 pads. **LEARN**: in SETUP press LEARN, then hit your pads 1–16 in order. Saved with the setup. |
+| **Banks** | Either the controller's own bank buttons (other notes → pads 17–64), or a **BANK** soft key / footswitch that shifts the same 16 notes to bank A/B/C/D. |
+| **Velocity** | Per controller: curve soft / linear / hard, or **FULL LEVEL** (always 127, the MPC button). Per pad: velocity → level and velocity → filter amounts. |
+| **Pad follow** | The last pad you hit becomes the selected pad on PADS, CHOP and STEP. Hit a pad, then edit it. |
+| **Knobs/faders (CC)** | **CC LEARN**: move a controller knob, then select a field (pad tune, filter, decay, level, swing, tempo…). It controls the last hit pad live. Recorded into the sequence on request (filter sweeps). |
+| **Transport** | Learn controller buttons (notes or CCs) for PLAY, STOP, REC, OVERDUB, TAP, NOTE REPEAT, ERASE. MIDI Start/Stop/Continue and MMC from the controller also work. |
+| **Aftertouch** | Optional: note repeat rate or filter from channel/poly pressure. |
+| **MIDI tracks** | Notes for tracks set to MIDI are sent to MIDI OUT (external synths); the controller's notes go thru to the selected MIDI track's channel. |
+
+The S1100 has **one MIDI IN**. To use a controller and an external clock (DAW, drum machine)
+at the same time, use a MIDI merge box, or let the S1100 be the clock master (MIDI clock OUT).
 
 ---
 
@@ -274,7 +290,7 @@ match the timing to the tick.
 | Release | Contents | Can you make a beat? |
 |---|---|---|
 | **0.1 "boots"** | MosuraOS boot screen, version, CLASSIC = everything stock | No – proves the toolchain |
-| **0.2 "pads"** | Keypad as 16 pads, PADS page, kits = programs | Finger-drum live |
+| **0.2 "pads"** | MIDI pad map + LEARN, velocity curves, pad follow, PADS page, kits = programs | Finger-drum live from the controller |
 | **0.3 "loop"** | MAIN page, 1 sequence, real-time record, quantise, swing, metronome | **Yes**, first beats |
 | **0.4 "chop"** | CHOP page: grid/MARK slicing to pads, BPM from length | Yes, chop breaks |
 | **0.5 "dig"** | SAMPLE page: threshold record, auto trim/normalise, vintage modes | The full dig → chop → beat loop |
@@ -285,7 +301,9 @@ match the timing to the tick.
 ## Technical approach (short)
 
 - New pages are drawn with **our own UI layer**, drawing on the LCD directly (LC7981, port 0x6000)
-  and reading the panel itself (8255, port 0x2000). Under it, **Akai's routines** do the hard parts:
+  and reading the panel itself (8255, port 0x2000). Pads and controller knobs come
+  through Akai's MIDI receive buffer (INT 09h, `0:0200`), which MosuraOS reads before Akai's
+  MIDI handler does. Under it, **Akai's routines** do the hard parts:
   voice start/stop, sample memory, disk and SCSI, time-stretch, DSP setup.
 - The OS runs from RAM and loads from floppy or Gotek, so we're not limited to the ROM size
   while developing (512 KB CPU RAM; the stock OS uses about 128 KB of code).
