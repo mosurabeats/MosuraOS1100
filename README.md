@@ -4,7 +4,9 @@ Custom firmware for the Akai S1100 sampler, built by patching Akai's OS v4.x:
 S950-mod-style performance features plus a built-in sequencer.
 
 - `docs/ROADMAP.md` – plan and feature list
+- `docs/DESIGN.md` – **the MosuraOS concept**: beatmaking workflow, modes, pads, screens, sequencer
 - `docs/HARDWARE.md` – what we know about the hardware, and what still needs checking
+- `docs/OSMAP.md` – map of Akai OS v4.30: memory layout, interrupts, I/O, routines found so far
 - `tools/romtool.py` – combine/split chip dumps, find free space, apply checked patches
 - `tools/mkosdisk.py` – build bootable Akai floppy images (`.img`) holding an OS, and list disk contents
 - `patches/` – our changes, as text files that check the original bytes first

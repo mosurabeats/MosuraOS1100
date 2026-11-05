@@ -289,6 +289,6 @@ match the timing to the tick.
   voice start/stop, sample memory, disk and SCSI, time-stretch, DSP setup.
 - The OS runs from RAM and loads from floppy or Gotek, so we're not limited to the ROM size
   while developing (512 KB CPU RAM; the stock OS uses about 128 KB of code).
-- What we need to find in the stock OS first (see `docs/OSMAP.md`): main loop and page
+- What we need to find in the stock OS first (progress in `docs/OSMAP.md`): main loop and page
   dispatch, key/encoder input, LCD drawing, MIDI input handler, voice-start routine,
   program/keygroup/sample structures in memory, timer interrupt use.

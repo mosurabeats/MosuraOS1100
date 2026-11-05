@@ -13,6 +13,8 @@ Commands:
   free IN [--min N]           find runs of 0xFF/0x00 (candidate patch space)
   strings IN [--min N]        printable strings with offsets (finds UI text)
   patch IN PATCHFILE OUT      apply a verified patch file (see patches/README.md)
+  ramimage IN OUT             lay the OS out as it sits in RAM after boot (for Ghidra/ndisasm)
+  addr IN HEX                 convert between ROM-image offset and runtime seg:off
 """
 import argparse
 import sys
@@ -139,6 +141,50 @@ def cmd_patch(a):
     print("NOTE: if the OS checks a ROM checksum, fix it before burning.")
 
 
+def layout(d):
+    """Runtime memory layout of the OS (boot code at image 0x40-0xA3).
+
+    The ROM image is copied to RAM 0x00000-0x1FFFF, then the init code moves
+    image [F3h]*16 .. [F5h]*16 to 1000:0000 and image [F5h]*16 .. 0x1FEE0 to
+    3000:0000, and jumps to 1000:0000.
+    Returns a list of (image_start, image_end, runtime_linear).
+    """
+    a = d[0xF3] | d[0xF4] << 8
+    b = d[0xF5] | d[0xF6] << 8
+    return [(0, a * 16, 0x00000), (a * 16, b * 16, 0x10000), (b * 16, 0x1FEE0, 0x30000)]
+
+
+def cmd_ramimage(a):
+    d = read(a.inp)
+    ram = bytearray(0x40000)
+    for start, end, lin in layout(d):
+        ram[lin:lin + end - start] = d[start:end]
+    Path(a.out).write_bytes(ram)
+    for start, end, lin in layout(d):
+        print(f"image 0x{start:05X}-0x{end - 1:05X} -> {lin >> 4:04X}:0000 (linear 0x{lin:05X})")
+    print(f"wrote {a.out} (256 KB; load in Ghidra as x86 real mode at 0x00000)")
+
+
+def cmd_addr(a):
+    d = read(a.inp)
+    s = a.value.replace("0x", "")
+    if ":" in s:  # runtime seg:off -> image offset
+        seg, off = (int(x, 16) for x in s.split(":"))
+        lin = seg * 16 + off
+        for start, end, base in layout(d):
+            if base <= lin < base + end - start:
+                print(f"{seg:04X}:{off:04X} = image 0x{start + lin - base:05X}")
+                return
+        sys.exit("address is outside the OS image")
+    img = int(s, 16)
+    for start, end, base in layout(d):
+        if start <= img < end:
+            lin = base + img - start
+            print(f"image 0x{img:05X} = {lin >> 16 << 12:04X}:{lin & 0xFFFF:04X}")
+            return
+    sys.exit("offset is outside the OS image")
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -154,6 +200,10 @@ def main():
     c.set_defaults(f=cmd_strings)
     c = s.add_parser("patch"); c.add_argument("inp"); c.add_argument("patchfile"); c.add_argument("out")
     c.set_defaults(f=cmd_patch)
+    c = s.add_parser("ramimage"); c.add_argument("inp"); c.add_argument("out")
+    c.set_defaults(f=cmd_ramimage)
+    c = s.add_parser("addr"); c.add_argument("inp"); c.add_argument("value", help="image offset (hex) or seg:off")
+    c.set_defaults(f=cmd_addr)
     a = p.parse_args()
     a.f(a)
 

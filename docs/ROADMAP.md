@@ -30,8 +30,11 @@ target 80186) plus NASM.
 
 ## Phase 1 – Map the OS
 - [x] Reset entry point: ROM copied to RAM 0x00000–0x1FFFF, OS starts at 0000:0000
-- [ ] Ghidra project (x86 real mode, image loaded at 0x00000), interrupt vectors, V50 peripheral setup
-- [ ] Find the routines that draw the LCD, read the keys/wheel, and handle MIDI input
+- [x] Runtime memory layout (code moved to 1000:0000 and 3000:0000), `romtool.py ramimage`
+- [x] Interrupt vectors, V50 peripheral setup, tick timer, MIDI receive, encoders (`OSMAP.md`)
+- [ ] Ghidra project on the runtime RAM image
+- [x] LCD register-write routine, encoder handlers, MIDI receive handler
+- [ ] Key matrix scan, main-button dispatch, page system
 - [ ] Find voice start/stop, program/keygroup data structures, disk load/save
 - [ ] Find the disk OS version check and any checksum the OS verifies
 
