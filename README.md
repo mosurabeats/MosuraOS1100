@@ -17,3 +17,10 @@ Quick start once you have dumps:
     python3 tools/romtool.py strings rom/os43.bin | less   # find menu text
     python3 tools/romtool.py free rom/os43.bin             # find room for new code
     python3 tools/mkosdisk.py build rom/os43.bin build/MOSURA_HD.img --version 4.31
+
+Gotek (FlashFloppy) USB stick – writes FF.CFG, a stock 4.30 image in slot 00,
+and each test build in the next numbered slot:
+
+    python3 tools/mkosdisk.py gotek /media/USBSTICK --stock rom/os43.bin
+    python3 tools/mkosdisk.py gotek /media/USBSTICK --stock rom/os43.bin \
+        --os build/mosura.bin --version 4.31 --label banner
