@@ -22,7 +22,8 @@ target 80186) plus NASM.
 ## Phase 0 – Hardware & references
 - [x] Service manual parts list → `HARDWARE.md` (CPU = NEC V50, DSP56001, LC7981 graphic LCD)
 - [x] OS v4.30 ROM image (`rom/`, git-ignored)
-- [ ] Save the OS to floppy on the S1100 and image that disk → learn the OS-disk format
+- [x] OS-disk format worked out from the ROM's load routine → `tools/mkosdisk.py`
+- [ ] **Hardware test:** boot `MOSURA_TEST_HD.img` (stock code, labelled 4.31) → the screen should show "OPERATING SYSTEM 4.31" while loading
 - [ ] Floppy emulator (Gotek with FlashFloppy, or HxC), or a USB floppy drive that can read and write 720K/1.44M disks
 - [ ] Look at the board: are the SCOEF ROMs (IC12/13) socketed? Photos of the CPU board
 - [x] S1100 schematics → memory map and I/O map in `HARDWARE.md`

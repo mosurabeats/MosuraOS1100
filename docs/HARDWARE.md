@@ -49,6 +49,18 @@ Front panel: 32 buttons (SW1–32, listed in the service manual), 8 LEDs, 2 rota
 - The owner's manual says: if a disk holding a **later OS version** is in the drive at power-on,
   that OS is loaded instead of the ROM. The OS can also save itself to disk ("OPERATING SYSTEM").
 
+## Booting an OS from floppy (disassembly, image offset 0xF4FA–0xF5E5, module runs with CS=0548)
+- The OS looks for a file of type `c` (0x63). The directory entry is copied to 0:4EEE, so the
+  type is at 4EFA, the 24-bit size at 4EFB, the start block at 4EFE and the version at 4F00.
+- At power-on (flag 0:4F4F = 1, set by the reset code) it loads the file if
+  **file version >= ROM version** (word 0:001C) **and major byte > 5**.
+- Version word: minor at image 0x1C, major at 0x1E (boot code copies it to 0x1D).
+  Displayed as (major−5).minor, so v4.30 = 0x091E.
+- Load: the first 64 KB goes to 6000:0000 and (size − 64 KB) bytes to 7000:0000. A 0x28-byte
+  copy stub then moves them to 0000:0000 / 1000:0000 and jumps to 0000:0040.
+  So an OS file = the ROM image minus the 0x120-byte boot code at the top = 0x1FEE0 bytes.
+- `tools/mkosdisk.py` builds S1000-format floppy images with such an OS file.
+
 ## Memory map (CPU 1/2 schematic + boot code)
 | Address | What |
 |---|---|
