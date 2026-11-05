@@ -1,25 +1,60 @@
 # S1100 hardware notes
 
-Status key: ✅ confirmed on our unit · 🌐 reported online, not checked · ❓ unknown
+Sources: S1100 service manual (Nov 1990, parts list), S1100 owner's manual v1.0,
+and our own disassembly of OS v4.30.
+Status: ✅ confirmed · 🔍 inferred from code or part numbers, needs checking · ❓ unknown
 
-| Item | Status | Notes |
+## Main parts (CPU board unless noted)
+
+| Item | Part | Status | Notes |
+|---|---|---|---|
+| CPU | **NEC µPD70216 (V50)**, IC1 | ✅ | 8086/80186 instruction set. Built-in timer (8254-type), interrupt controller (8259-type), DMA and serial port. |
+| CPU clock | X1 20 MHz crystal | 🔍 | V50 runs at half the crystal, so probably 10 MHz (the -10 suffix also means 10 MHz). |
+| Other crystals | X2 32 MHz, X3 33.8688 MHz | 🔍 | 33.8688 MHz = 768 × 44.1 kHz, so this is the audio clock. |
+| OS EPROMs | IC10 (L) + IC11 (M), MBM27C1001 | ✅ | 128 KB in total: even bytes in L, odd bytes in M. Only the top 64 KB of each chip is used. |
+| **Empty ROM sockets** | **IC10A + IC11A** | ✅ | Listed as "BLANK ROM". Possible room for another 256 KB of code. Need to find out where they sit in memory. |
+| CPU RAM | IC18–21, 4 × MB81C4256 (256K×4) | 🔍 | = 512 KB. The OS runs from RAM (see boot below). |
+| Battery/static RAM | IC14, LC3517 (2K×8) | 🔍 | Probably saved settings. |
+| Interpolation coefficient ROMs | **IC12 SCOEF10 (LSB), IC13 SCOEF11 (MSB)**, 512 Kbit each | ✅ | The sinc tables used for pitch shifting. Socketed? Replacing these = real-time aliasing mod. |
+| Voice/pitch chips | ITP-L6009 (interpolator), FLR-L6009 (filter), ADR6021 | ✅ | Custom Akai chips, no documentation. We drive them through Akai's routines. |
+| LCD controller | **Sanyo LC7981**, IC7 | ✅ | Text **and graphics** controller (HD61830-type). LCD is **240×64 graphic**, used as 40×8 text. |
+| LCD module | EDM-MPJ2COW + EL backlight | ✅ | |
+| Floppy controller | µPD72068 (IC3) | ✅ | Floppy is 3.5" HD/DD. |
+| Parallel I/O | MB89255 (8255-type), IC9 | ✅ | Probably panel keys/LEDs. |
+| Misc | TE7730, CXD1211P, PST520 (reset) | ❓ | TE7730 may be the second clock/timer chip. |
+| MIDI | 6N137 opto, DIN on CPU board | 🔍 | MIDI UART is probably the V50's built-in serial port. |
+
+## Other boards
+
+| Board | Main parts | Notes |
 |---|---|---|
-| CPU | 🌐 | x86-compatible NEC V-series (V53 reported for Akai gear of this era). Read the chip marking. |
-| CPU clock | ❓ | Read the crystal marking. |
-| OS ROMs | 🌐 | Last official OS: v4.3 on EPROM. Need the chip count, type (27C010/020/040?) and IC numbers. |
-| Even/odd ROM pairing | ❓ | Check which chip connects to D0–D7 and which to D8–D15. |
-| Work RAM (CPU) | ❓ | Separate from sample RAM? How much? Important for storing sequencer data. |
-| Sample RAM | 🌐 | 2 MB stock, expandable to 32 MB. |
-| Voice hardware | ❓ | Custom Akai chips, 16 voices. We control them only through Akai's own routines. |
-| Interpolation ROMs | 🌐 | Sinc tables in EPROMs (S1000 KVR analysis). Dump these too – they are the key to real-time aliasing. |
-| Effects DSP | ❓ | Chip type? Does the OS load its program from RAM (= we can write new effects)? |
-| LCD | 🌐 | 40×8 characters, or a graphic screen? Controller chip (e.g. a T6963C or HD61830 means graphics are possible). |
-| MIDI UART | ❓ | Inside the V53, or a separate chip? |
-| Timer for MIDI clock | ❓ | |
-| SCSI controller | ❓ | Chip type? |
-| Floppy controller | ❓ | Chip type? |
-| SMPTE reader | 🌐 | S1100 has one built in. Good for syncing the sequencer. |
+| **DSP** | **Motorola DSP56001 @ 20 MHz**, 6 × TC55257 (32K×8 SRAM = 192 KB) | **No program ROM on the board**, so the OS must upload the DSP's program. Writing new real-time effects is possible: reverb, crusher, filters and so on. |
+| SMPTE | Hitachi HD63B03 (6303 microcontroller) with its own 27C256 ROM | Separate processor that decodes timecode and reports to the main CPU. |
+| SCSI | Fujitsu MB89352 | |
+| Voice 1/2 | 4 × PCM56P DAC each | 8 individual outputs. |
+| A/D | AK5326 ADC, 3 × PCM56P (L, R, effect send) | |
+| Memory | 16 × HM511000 (1M×1) = 2 MB sample RAM | EXM005 (+2 MB), EXM008 (+8 MB, HM514100). |
 
-## Reading ROMs
-Use an EPROM reader set to the exact chip type, and read each chip at least twice.
-The reads must match byte for byte (`cmp a.bin b.bin`). Note the label on each chip.
+Front panel: 32 buttons (SW1–32, listed in the service manual), 8 LEDs, 2 rotary encoders (CURSOR, DATA).
+
+## Boot (from disassembly of v4.30)
+
+- Reset: JMP FFEE:0000. The ROM is mapped at E0000–FFFFF.
+- The boot code **copies the whole ROM into RAM** (E000→0000:0000, F000→1000:0000) and jumps to 0000:0000.
+  The OS runs from RAM, and the ROM is only read at power-on.
+- A second entry point at FFEE:0033 is a **serial loader**. It reads a length and the
+  data from I/O ports 0x8020/0x8022 into 0000:0000, then the second 64 KB block into 1000:0000, then runs it.
+  This is likely a factory download mode (port 0x8020 may be the MIDI UART).
+- The owner's manual says: if a disk holding a **later OS version** is in the drive at power-on,
+  that OS is loaded instead of the ROM. The OS can also save itself to disk ("OPERATING SYSTEM").
+
+## I/O ports seen so far
+| Port | Use (guess) |
+|---|---|
+| 0x8020 / 0x8022 | Serial data / status (V50 serial port) |
+| 0x8032 | Timer/baud setup |
+| 0x2004 | Display/LEDs during serial load |
+| 0x300C / 0x300E | Unknown, written during serial load |
+
+## Hardware test mode
+Hold MARK + NAME at power-on, then press +. It offers CPU RAM and sample RAM tests and ADC offset checks. Press F8 to leave.
