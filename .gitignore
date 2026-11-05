@@ -1,0 +1,6 @@
+# Akai's original ROM images are copyrighted -- keep dumps local, never commit them.
+rom/*.bin
+rom/*.BIN
+rom/*.rom
+build/
+__pycache__/
