@@ -39,7 +39,10 @@ target 80186) plus NASM.
 - [ ] Find the disk OS version check and any checksum the OS verifies
 
 ## Phase 2 – First mod (tests the whole process)
-- [ ] "MosuraOS" boot screen + version string
+- [x] Build pipeline: `tools/build.py` (ROM + patches → OS image → floppy/Gotek images), tests
+- [x] 0.1 patch: power-on page title "MOSURAOS 0.1 PROGS", loads as OPERATING SYSTEM 5.01
+- [ ] **Hardware test of 0.1** on the S1100 via Gotek
+- [ ] Room for new code: include image 0x1FEE0–0x1FFEF in the moved block B (init constant 0x1FEE at image 0x76 → 0x1FFF) for a ~270-byte loader at 3000:AA80, which then loads a MosuraOS extension file from disk into free RAM (needs a RAM usage map first)
 - [ ] Hook that jumps from Akai's code into our code and back, with a test page
 
 ## Phase 3 – Interface & workflow

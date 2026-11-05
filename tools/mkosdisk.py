@@ -157,7 +157,7 @@ def cmd_gotek(a):
 
     if a.os:
         osver = parse_version(a.version)
-        tag = "".join(c if c.isalnum() else "_" for c in a.label.upper())
+        tag = "".join(c if c.isalnum() or c in ".-" else "_" for c in a.label.upper())
         existing = sorted(out.glob("[0-9][0-9]_*.img"))
         same = [p for p in existing if p.name[3:] == f"MOSURA_V{fmt_version(osver)}_{tag}.img"]
         if same:

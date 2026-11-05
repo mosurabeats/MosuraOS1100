@@ -1,0 +1,4 @@
+# MosuraOS 0.1 – first visible change.
+# Title of the power-on page (SELECT PROG), image 0x167C2, 18 characters.
+# Page text format: 0x8A x y = move to pixel x,y; 0xFF = end of page text.
+0x167C2  "PROGRAMS IN MEMORY"  ->  "MOSURAOS 0.1 PROGS"

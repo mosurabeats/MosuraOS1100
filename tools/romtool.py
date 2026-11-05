@@ -98,47 +98,71 @@ def cmd_strings(a):
             cur = bytearray()
 
 
-def parse_hex(s):
+def parse_value(s):
+    """Hex bytes ('90 90 C3') or a quoted string ("TEXT")."""
+    s = s.strip()
+    if len(s) >= 2 and s[0] == s[-1] == '"':
+        return s[1:-1].encode("ascii")
     s = s.replace(" ", "")
     return bytes.fromhex(s) if s else b""
 
 
-def cmd_patch(a):
-    """Patch file format, one patch per line:
-        OFFSET  EXPECTED_HEX  ->  NEW_HEX   # comment
-    EXPECTED must match the input exactly, so a patch can never be applied
-    to the wrong OS version. Use '*' for EXPECTED only on free space you
-    have confirmed is unused (it then must be all 0xFF or all 0x00).
+def strip_comment(line):
+    """Drop a trailing # comment, but not a # inside quotes."""
+    inq = False
+    for i, c in enumerate(line):
+        if c == '"':
+            inq = not inq
+        elif c == "#" and not inq:
+            return line[:i]
+    return line
+
+
+def apply_patch_file(d, patchfile):
+    """Apply one patch file to bytearray d in place; return the number of patches.
+
+    Format, one patch per line:
+        OFFSET  EXPECTED  ->  NEW     # comment
+    OFFSET is a ROM-image offset in hex. EXPECTED and NEW are hex bytes or a
+    "quoted string" and must be the same length. EXPECTED must match the image
+    exactly, so a patch can never be applied to the wrong OS version.
+    Use * for EXPECTED only on free space you have confirmed is unused
+    (it must then be all 0x00 or all 0xFF).
     """
-    d = bytearray(read(a.inp))
     applied = 0
-    for ln, raw in enumerate(Path(a.patchfile).read_text().splitlines(), 1):
-        line = raw.split("#", 1)[0].strip()
+    for ln, raw in enumerate(Path(patchfile).read_text().splitlines(), 1):
+        line = strip_comment(raw).strip()
         if not line:
             continue
         try:
-            left, new_hex = line.split("->")
+            left, new_s = line.split("->")
             off_s, exp_s = left.split(None, 1)
             off = int(off_s, 16)
-            new = parse_hex(new_hex)
+            new = parse_value(new_s)
         except ValueError:
-            sys.exit(f"{a.patchfile}:{ln}: cannot parse: {raw}")
+            sys.exit(f"{patchfile}:{ln}: cannot parse: {raw}")
         cur = bytes(d[off:off + len(new)])
         if exp_s.strip() == "*":
             if len(set(cur)) != 1 or cur[0] not in (0x00, 0xFF):
-                sys.exit(f"{a.patchfile}:{ln}: 0x{off:X} is not free space")
+                sys.exit(f"{patchfile}:{ln}: 0x{off:X} is not free space")
         else:
-            exp = parse_hex(exp_s)
+            exp = parse_value(exp_s)
             if len(exp) != len(new):
-                sys.exit(f"{a.patchfile}:{ln}: expected/new length differ")
+                sys.exit(f"{patchfile}:{ln}: expected and new are not the same length "
+                         f"({len(exp)} vs {len(new)} bytes)")
             if cur != exp:
-                sys.exit(f"{a.patchfile}:{ln}: at 0x{off:X} found {cur.hex(' ')}, "
+                sys.exit(f"{patchfile}:{ln}: at 0x{off:X} found {cur.hex(' ')}, "
                          f"expected {exp.hex(' ')} -- wrong OS version?")
         d[off:off + len(new)] = new
         applied += 1
+    return applied
+
+
+def cmd_patch(a):
+    d = bytearray(read(a.inp))
+    n = apply_patch_file(d, a.patchfile)
     Path(a.out).write_bytes(d)
-    print(f"applied {applied} patches -> {a.out}")
-    print("NOTE: if the OS checks a ROM checksum, fix it before burning.")
+    print(f"applied {n} patches -> {a.out}")
 
 
 def layout(d):

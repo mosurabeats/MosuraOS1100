@@ -12,6 +12,19 @@ S950-mod-style performance features plus a built-in sequencer.
 - `patches/` – our changes, as text files that check the original bytes first
 - `rom/` – your local ROM dumps (git-ignored; Akai's code is never committed)
 
+## Build MosuraOS
+
+    python3 tools/build.py                        # -> build/mosura.bin, build/MOSURAOS_<ver>_HD.img
+    python3 tools/build.py --gotek /media/STICK   # also add it to a FlashFloppy Gotek stick
+    python3 -m unittest discover -s tests         # tool tests (no ROM needed)
+
+Needs `rom/os430.bin` (the stock v4.30 image, git-ignored). Patches live in
+`patches/os430/`, applied in name order; the version is in `VERSION`.
+MosuraOS M.m loads as "OPERATING SYSTEM (5+M).mm" (0.1 → 5.01), because the
+ROM only boots disk OS versions of 4.30 or higher.
+
+## Working with the ROM
+
 Quick start once you have dumps:
 
     python3 tools/romtool.py interleave rom/even.bin rom/odd.bin rom/os430.bin
