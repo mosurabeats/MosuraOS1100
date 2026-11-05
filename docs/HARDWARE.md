@@ -11,9 +11,9 @@ Status key: ✅ confirmed on our unit · 🌐 reported online, not checked · �
 | Work RAM (CPU) | ❓ | Separate from sample RAM? How much? Important for storing sequencer data. |
 | Sample RAM | 🌐 | 2 MB stock, expandable to 32 MB. |
 | Voice hardware | ❓ | Custom Akai chips, 16 voices. We control them only through Akai's own routines. |
-| Interpolation ROMs | 🌐 | Sinc kernels stored in EPROMs (S1000 KVR analysis). |
-| Effects DSP | ❓ | Chip type? |
-| LCD | 🌐 | 40×8 characters (or graphic?). Controller chip? |
+| Interpolation ROMs | 🌐 | Sinc tables in EPROMs (S1000 KVR analysis). Dump these too – they are the key to real-time aliasing. |
+| Effects DSP | ❓ | Chip type? Does the OS load its program from RAM (= we can write new effects)? |
+| LCD | 🌐 | 40×8 characters, or a graphic screen? Controller chip (e.g. a T6963C or HD61830 means graphics are possible). |
 | MIDI UART | ❓ | Inside the V53, or a separate chip? |
 | Timer for MIDI clock | ❓ | |
 | SCSI controller | ❓ | Chip type? |
