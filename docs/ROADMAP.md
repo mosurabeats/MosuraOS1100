@@ -38,12 +38,16 @@ Depends on the LCD (40×8 text-only, or a graphic screen?).
 - [ ] Easier naming, batch rename, quicker file browsing
 - [ ] MIDI CC → filter, pitch, loop points and other parameters, changed live; extra LFOs
 
-## Phase 4 – Sequencer
-- [ ] Pattern-based, 16+ tracks, plays internal voices and sends to MIDI out
-- [ ] Step and real-time recording, quantize, swing, mute/solo
+## Phase 4 – Sequencer (MPC3000-style)
+Our own code, modelled on how the MPC3000 works (it shares an engine with the S3000).
+- [ ] 96 PPQN timing, 99 sequences × 32 tracks (or as many as memory allows), songs from chained sequences
+- [ ] MPC-style swing (50–75%), timing correct, note repeat
+- [ ] Real-time (loop) recording with overdub, step edit, erase while playing
+- [ ] Drum mode: 16 "pads" across 4 banks, each pad triggering a keygroup;
+      played from a MIDI pad controller, or from front-panel keys in a pad mode
+- [ ] Mute/solo, tempo changes, bar copy/insert/delete
 - [ ] Sync: internal clock, MIDI clock in/out, **SMPTE** (S1100 hardware)
-- [ ] Patterns → song chaining
-- [ ] Save/load with programs on floppy/SCSI
+- [ ] Plays the internal voices and sends to MIDI out; save/load with programs on floppy/SCSI
 
 ## Phase 5 – Vintage crunch
 Three levels, from safest to most hardware-dependent:
