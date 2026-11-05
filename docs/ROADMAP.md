@@ -15,7 +15,8 @@ the S1100 loads a newer OS from floppy at power-on, and the OS runs from RAM any
 3. Power on → test → if it crashes, take the disk out and the stock ROM OS boots as normal
 
 The disk-loaded OS isn't limited by ROM size: 512 KB of CPU RAM is available.
-Burn EPROMs only at the end (or never). New code: C (OpenWatcom / gcc-ia16,
+Burn EPROMs only at the end (or never). For a ROM build there is 128 KB of
+free space at C0000–DFFFF in the existing 27C1001 sockets. New code: C (OpenWatcom / gcc-ia16,
 target 80186) plus NASM.
 
 ## Phase 0 – Hardware & references
@@ -24,7 +25,7 @@ target 80186) plus NASM.
 - [ ] Save the OS to floppy on the S1100 and image that disk → learn the OS-disk format
 - [ ] Floppy emulator (Gotek with FlashFloppy, or HxC), or a USB floppy drive that can read and write 720K/1.44M disks
 - [ ] Look at the board: are the SCOEF ROMs (IC12/13) socketed? Photos of the CPU board
-- [ ] S1000 schematic, if you can find one: memory map and I/O decoding
+- [x] S1100 schematics → memory map and I/O map in `HARDWARE.md`
 
 ## Phase 1 – Map the OS
 - [x] Reset entry point: ROM copied to RAM 0x00000–0x1FFFF, OS starts at 0000:0000
